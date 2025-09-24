@@ -208,102 +208,6 @@ def generate_pdf_report(all_data):
     doc.build(story)
     return filename
 
-
-    # # 主要指数图表
-    # story.append(Paragraph("主要指数涨跌幅", styles['Heading1']))
-    # indices_chart = create_bar_chart(indices_data, "主要指数", font_name)
-    # story.append(indices_chart)
-    # story.append(Spacer(1, 0.3*inch))
-    
-    # # 七大科技巨头图表
-    # story.append(PageBreak())
-    # story.append(Paragraph("七大科技巨头涨跌幅", styles['Heading1']))
-    # magnificent_chart = create_bar_chart(magnificent_seven_data, "七大科技巨头", font_name)
-    # story.append(magnificent_chart)
-    # story.append(Spacer(1, 0.3*inch))
-    
-    # # 主要板块图表
-    # story.append(PageBreak())
-    # story.append(Paragraph("主要板块涨跌幅", styles['Heading1']))
-    # sector_chart = create_bar_chart(sector_data, "主要板块", font_name)
-    # story.append(sector_chart)
-    # story.append(Spacer(1, 0.3*inch))
-    
-    # # 市场分析
-    # story.append(PageBreak())
-    # analysis_title = Paragraph("市场分析", styles['Heading1'])
-    # story.append(analysis_title)
-    
-    # # 计算上涨和下跌的指数数量
-    # indices_up = sum(1 for info in indices_data.values() if info and info['change'] > 0)
-    # indices_down = sum(1 for info in indices_data.values() if info and info['change'] < 0)
-    
-    # # 计算上涨和下跌的科技巨头数量
-    # magnificant_up = sum(1 for info in magnificent_seven_data.values() if info and info['change'] > 0)
-    # magnificant_down = sum(1 for info in magnificent_seven_data.values() if info and info['change'] < 0)
-    
-    # # 计算上涨和下跌的板块数量
-    # sector_up = sum(1 for info in sector_data.values() if info and info['change'] > 0)
-    # sector_down = sum(1 for info in sector_data.values() if info and info['change'] < 0)
-    
-    # analysis_data = [
-    #     ['市场统计', '上涨数量', '下跌数量'],
-    #     ['主要指数', str(indices_up), str(indices_down)],
-    #     ['科技七巨头', str(magnificant_up), str(magnificant_down)],
-    #     ['主要板块', str(sector_up), str(sector_down)]
-    # ]
-    
-    # analysis_table = Table(analysis_data, colWidths=[1.5*inch, 1*inch, 1*inch])
-    # analysis_table.setStyle(TableStyle([
-    #     ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-    #     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-    #     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-    #     ('FONTNAME', (0, 0), (-1, -1), font_name),
-    #     ('FONTSIZE', (0, 0), (-1, -1), 10),
-    #     ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-    #     ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    # ]))
-    # story.append(analysis_table)
-    # story.append(Spacer(1, 0.3*inch))
-    
-    # # 找出表现最好的和最差的
-    # all_data = {
-    #     **{f"指数-{name}": info for name, info in indices_data.items()},
-    #     **{f"科技-{name}": info for name, info in magnificent_seven_data.items()},
-    #     **{f"板块-{name}": info for name, info in sector_data.items()}
-    # }
-    
-    # valid_data = {name: info for name, info in all_data.items() if info}
-    
-    # if valid_data:
-    #     best_performer = max(valid_data.items(), key=lambda x: x[1]['change_percent'] if x[1] else -float('inf'))
-    #     worst_performer = min(valid_data.items(), key=lambda x: x[1]['change_percent'] if x[1] else float('inf'))
-        
-    #     performance_data = []
-    #     performance_data.append(['表现类型', '名称', '涨跌幅(%)'])
-        
-    #     if best_performer[1]:
-    #         performance_data.append(['最佳表现', best_performer[0], f"+{best_performer[1]['change_percent']:.2f}%"])
-            
-    #     if worst_performer[1]:
-    #         performance_data.append(['最差表现', worst_performer[0], f"{worst_performer[1]['change_percent']:.2f}%"])
-            
-    #     performance_table = Table(performance_data, colWidths=[1.5*inch, 2*inch, 1*inch])
-    #     performance_table.setStyle(TableStyle([
-    #         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-    #         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-    #         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-    #         ('FONTNAME', (0, 0), (-1, -1), font_name),
-    #         ('FONTSIZE', (0, 0), (-1, -1), 10),
-    #         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-    #         ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    #     ]))
-    #     story.append(performance_table)
-    
-    # 构建PDF
-    # doc.build(story)
-    # return filename
-
 def create_bar_chart(data, font_name):
     """
     创建柱状图
@@ -320,7 +224,7 @@ def create_bar_chart(data, font_name):
     for name, info in valid_data.items():
         names.append(f"{name}({info['change_percent']}%)")
         changes.append(info['change_percent'])
-   
+
     # 创建绘图对象
     drawing = Drawing(400, 200)
     
@@ -361,25 +265,57 @@ def create_bar_chart(data, font_name):
     bc.valueAxis.labels.fontName = font_name
     bc.valueAxis.labels.fontSize = 8
     
-    # 计算每个柱子的高度比例
-    # value_range = bc.valueAxis.valueMax - bc.valueAxis.valueMin
-    # bar_heights = [(change - bc.valueAxis.valueMin) / value_range * bc.height for change in changes]
-    # max_height = max(bar_heights)
-    # # 添加数据标签，并确保与柱体顶部对齐
-    # for i, (change, bar_height) in enumerate(zip(changes, bar_heights)):
-    #     label = Label()
-    #     # 计算标签的y坐标，使其位于柱体顶部上方5个像素处
-    #     # x_position = bc.x + (bc.barWidth) + (i * (bc.barWidth + bc.groupSpacing)) 
-    #     x_position = bc.x + bc.barWidth + bc.groupSpacing + (i * (bc.barWidth + bc.groupSpacing)) 
-    #     # 计算标签的y坐标，使其位于柱体正上方
-    #     y_position = bc.y + bar_height + 5
-    #     label.setOrigin(x_position , y_position)
-    #     label.setText(f"{change:.1f}%")
-    #     label.fontSize = 8
-    #     label.fontName = font_name
-    #     label.boxAnchor = 's'
-    #     drawing.add(label)
-
     drawing.add(bc)
 
     return drawing
+
+def get_option_data(ticker_symbol, max_retries=3):
+    """
+    获取指定股票代码的期权数据，包含重试机制
+    """
+    for attempt in range(max_retries):
+        try:
+            print(f"正在获取 {ticker_symbol} 的期权数据... (尝试 {attempt + 1}/{max_retries})")
+            ticker = yf.Ticker(ticker_symbol)
+            expiration_dates = ticker.options
+
+            # 获取股票当前价格
+            stock_price = None
+            try:
+                stock_info = ticker.info
+                stock_price = stock_info.get('regularMarketPrice', None)
+                if stock_price is None:
+                    # 尝试其他可能的价格字段
+                    stock_price = stock_info.get('currentPrice', None)
+                    if stock_price is None:
+                        stock_price = stock_info.get('previousClose', None)
+            except Exception as e:
+                print(f"获取 {ticker_symbol} 当前价格时出错: {e}")
+
+            # 获取最近的到期日数据
+            if expiration_dates:
+                # 使用最近的到期日
+                nearest_expiration = expiration_dates[0]
+                opt_chain = ticker.option_chain(nearest_expiration)
+                return opt_chain, stock_price
+            else:
+                print(f"无法获取 {ticker_symbol} 的期权数据")
+                raise
+
+        except yf.exceptions.YFRateLimitError:
+            if attempt < max_retries - 1:
+                print(f"遇到请求限制，等待10秒后重试...")
+                time.sleep(10)
+            else:
+                print(f"达到最大重试次数，无法获取 {ticker_symbol} 的数据")
+                return None, None
+        except Exception as e:
+            print(f"获取 {ticker_symbol} 数据时出错: {e}")
+            if attempt < max_retries - 1:
+                print(f"等待5秒后重试...")
+                time.sleep(5)
+            else:
+                print(f"达到最大重试次数，无法获取 {ticker_symbol} 的数据")
+                return None, None
+
+    return None, None
