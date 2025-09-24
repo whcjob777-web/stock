@@ -159,7 +159,9 @@ def generate_pdf_report(indices_data, magnificent_seven_data=None, sector_data=N
         print(f"使用字体: {font_name}")
     
     # 创建PDF文档
-    filename = f"美股市场每日数据_{get_previous_weekday().replace('-', '')}.pdf"
+    import os
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    filename = f"{current_dir}/美股市场每日数据_{get_previous_weekday().replace('-', '')}.pdf"
     doc = SimpleDocTemplate(filename, pagesize=A4)
     styles = getSampleStyleSheet()
     
