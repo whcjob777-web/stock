@@ -250,7 +250,7 @@ def main():
     qqq_calls, qqq_puts, qqq_price = get_option_data("QQQ")
     
     # 等待一段时间避免触发速率限制
-    time.sleep(1)
+    # time.sleep(1)
     
     print("正在获取SPY期权数据...")
     spy_calls, spy_puts, spy_price = get_option_data("SPY")

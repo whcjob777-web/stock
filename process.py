@@ -8,10 +8,10 @@ os.environ['HTTPS_PROXY'] = proxy
 
 # 美股主要指数
 MAJOR_INDICES = {
-    '^DJI': '道琼斯工业平均指数',
-    '^GSPC': '标准普尔500指数',
-    '^NDX': '纳斯达克100指数',
-    "^RUT": "罗素2000指数"
+    '^DJI': '道琼斯',
+    '^GSPC': '标普500',
+    '^NDX': '纳斯达克100',
+    "^RUT": "罗素2000"
 }
 
 # 七大科技巨头（Magnificent Seven）
@@ -27,22 +27,24 @@ MAGNIFICENT_SEVEN = {
 
 # 主要板块ETF
 SECTOR_ETF = {
-    'XLK': '科技板块',
-    'XLF': '金融板块',
-    'XLY': '消费板块',
-    'XLE': '能源板块',
-    'XLV': '医疗板块',
-    'XLI': '工业板块',
-    'XLB': '材料板块',
-    'XLRE': '房地产板块',
-    'XLU': '公用事业板块'
+    'XLK': '科技',
+    'XLF': '金融',
+    'XLY': '消费',
+    'XLE': '能源',
+    'XLV': '医疗',
+    'XLI': '工业',
+    'XLB': '材料',
+    'XLRE': '房地产',
+    'XLU': '公用事业'
 }
 
-#qqq 和 spy
-QQQ_SPY = {
-    'QQQ': '纳斯达克100指数ETF',
-    'SPY': '标普500指数ETF'
+# 加密股
+CRYPTO_STOCKS = {
+    "MSTR":"MSTR",
+    "BMNR":"BMNR",
+    "SBET":"SBET",
 }
+
 
 def main():
     print("正在获取美股市场数据...")
@@ -60,11 +62,21 @@ def main():
     # # 获取板块数据
     print("\n正在获取主要板块数据...")
     sector_data = fetch_stock_data(SECTOR_ETF, period="5d")
+
+    # # 获取加密股数据
+    print("\n正在获取加密股数据...")
+    crypto_data = fetch_stock_data(CRYPTO_STOCKS, period="5d")
+
+    all_data = {
+        "主要指数":indices_data,
+        "七巨头":magnificent_seven_data,
+        "板块":sector_data,
+        "加密股":crypto_data
+    }
     
     # 生成PDF报告
     print("\n正在生成PDF报告...")
-    filename = generate_pdf_report(indices_data, magnificent_seven_data, sector_data)
-    # filename = generate_pdf_report(indices_data, {}, {})
+    filename = generate_pdf_report(all_data)
     print(f"PDF报告已生成: {filename}")
 
 if __name__ == "__main__":

@@ -85,8 +85,8 @@ def fetch_stock_data(symbols_dict: Dict[str, str], period: str = "5d"):
                 data[name] = None
                 
             # 在请求之间添加延迟以避免频率限制
-            if i < symbol_count - 1:  # 不需要在最后一个请求后等待
-                time.sleep(1)
+            # if i < symbol_count - 1:  # 不需要在最后一个请求后等待
+            #     time.sleep(1)
                 
         except Exception as e:
             print(f"获取 {name} ({symbol}) 数据时出错: {str(e)}")
@@ -111,10 +111,7 @@ def create_table_data(title, data):
             
     return table_data
 
-def generate_pdf_report(indices_data, magnificent_seven_data=None, sector_data=None):
-    """
-    生成PDF报告
-    """
+def get_font():
     # 注册中文字体
     font_name = 'Helvetica'  # 默认字体
     
@@ -157,6 +154,14 @@ def generate_pdf_report(indices_data, magnificent_seven_data=None, sector_data=N
         print("警告: 未找到可用的中文字体，将使用默认字体Helvetica")
     else:
         print(f"使用字体: {font_name}")
+
+    return font_name
+
+def generate_pdf_report(all_data):
+    """
+    生成PDF报告
+    """
+    font_name = get_font()
     
     # 创建PDF文档
     import os
@@ -193,102 +198,113 @@ def generate_pdf_report(indices_data, magnificent_seven_data=None, sector_data=N
     
     # 创建柱状图
     
-    # 主要指数图表
-    story.append(Paragraph("主要指数涨跌幅", styles['Heading1']))
-    indices_chart = create_bar_chart(indices_data, "主要指数", font_name)
-    story.append(indices_chart)
-    story.append(Spacer(1, 0.3*inch))
-    
-    # 七大科技巨头图表
-    story.append(PageBreak())
-    story.append(Paragraph("七大科技巨头涨跌幅", styles['Heading1']))
-    magnificent_chart = create_bar_chart(magnificent_seven_data, "七大科技巨头", font_name)
-    story.append(magnificent_chart)
-    story.append(Spacer(1, 0.3*inch))
-    
-    # 主要板块图表
-    story.append(PageBreak())
-    story.append(Paragraph("主要板块涨跌幅", styles['Heading1']))
-    sector_chart = create_bar_chart(sector_data, "主要板块", font_name)
-    story.append(sector_chart)
-    story.append(Spacer(1, 0.3*inch))
-    
-    # 市场分析
-    story.append(PageBreak())
-    analysis_title = Paragraph("市场分析", styles['Heading1'])
-    story.append(analysis_title)
-    
-    # 计算上涨和下跌的指数数量
-    indices_up = sum(1 for info in indices_data.values() if info and info['change'] > 0)
-    indices_down = sum(1 for info in indices_data.values() if info and info['change'] < 0)
-    
-    # 计算上涨和下跌的科技巨头数量
-    magnificant_up = sum(1 for info in magnificent_seven_data.values() if info and info['change'] > 0)
-    magnificant_down = sum(1 for info in magnificent_seven_data.values() if info and info['change'] < 0)
-    
-    # 计算上涨和下跌的板块数量
-    sector_up = sum(1 for info in sector_data.values() if info and info['change'] > 0)
-    sector_down = sum(1 for info in sector_data.values() if info and info['change'] < 0)
-    
-    analysis_data = [
-        ['市场统计', '上涨数量', '下跌数量'],
-        ['主要指数', str(indices_up), str(indices_down)],
-        ['科技七巨头', str(magnificant_up), str(magnificant_down)],
-        ['主要板块', str(sector_up), str(sector_down)]
-    ]
-    
-    analysis_table = Table(analysis_data, colWidths=[1.5*inch, 1*inch, 1*inch])
-    analysis_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 0), (-1, -1), font_name),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-        ('GRID', (0, 0), (-1, -1), 1, colors.black)
-    ]))
-    story.append(analysis_table)
-    story.append(Spacer(1, 0.3*inch))
-    
-    # 找出表现最好的和最差的
-    all_data = {
-        **{f"指数-{name}": info for name, info in indices_data.items()},
-        **{f"科技-{name}": info for name, info in magnificent_seven_data.items()},
-        **{f"板块-{name}": info for name, info in sector_data.items()}
-    }
-    
-    valid_data = {name: info for name, info in all_data.items() if info}
-    
-    if valid_data:
-        best_performer = max(valid_data.items(), key=lambda x: x[1]['change_percent'] if x[1] else -float('inf'))
-        worst_performer = min(valid_data.items(), key=lambda x: x[1]['change_percent'] if x[1] else float('inf'))
-        
-        performance_data = []
-        performance_data.append(['表现类型', '名称', '涨跌幅(%)'])
-        
-        if best_performer[1]:
-            performance_data.append(['最佳表现', best_performer[0], f"+{best_performer[1]['change_percent']:.2f}%"])
-            
-        if worst_performer[1]:
-            performance_data.append(['最差表现', worst_performer[0], f"{worst_performer[1]['change_percent']:.2f}%"])
-            
-        performance_table = Table(performance_data, colWidths=[1.5*inch, 2*inch, 1*inch])
-        performance_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, -1), font_name),
-            ('FONTSIZE', (0, 0), (-1, -1), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
-        ]))
-        story.append(performance_table)
-    
+    for key, value in all_data.items():
+        story.append(Paragraph(f"{key}数据", styles['Heading1']))
+        chart = create_bar_chart(value, font_name=font_name)
+        story.append(chart)
+        story.append(Spacer(1, 0.3*inch))
+
     # 构建PDF
     doc.build(story)
     return filename
 
-def create_bar_chart(data, title, font_name):
+
+    # # 主要指数图表
+    # story.append(Paragraph("主要指数涨跌幅", styles['Heading1']))
+    # indices_chart = create_bar_chart(indices_data, "主要指数", font_name)
+    # story.append(indices_chart)
+    # story.append(Spacer(1, 0.3*inch))
+    
+    # # 七大科技巨头图表
+    # story.append(PageBreak())
+    # story.append(Paragraph("七大科技巨头涨跌幅", styles['Heading1']))
+    # magnificent_chart = create_bar_chart(magnificent_seven_data, "七大科技巨头", font_name)
+    # story.append(magnificent_chart)
+    # story.append(Spacer(1, 0.3*inch))
+    
+    # # 主要板块图表
+    # story.append(PageBreak())
+    # story.append(Paragraph("主要板块涨跌幅", styles['Heading1']))
+    # sector_chart = create_bar_chart(sector_data, "主要板块", font_name)
+    # story.append(sector_chart)
+    # story.append(Spacer(1, 0.3*inch))
+    
+    # # 市场分析
+    # story.append(PageBreak())
+    # analysis_title = Paragraph("市场分析", styles['Heading1'])
+    # story.append(analysis_title)
+    
+    # # 计算上涨和下跌的指数数量
+    # indices_up = sum(1 for info in indices_data.values() if info and info['change'] > 0)
+    # indices_down = sum(1 for info in indices_data.values() if info and info['change'] < 0)
+    
+    # # 计算上涨和下跌的科技巨头数量
+    # magnificant_up = sum(1 for info in magnificent_seven_data.values() if info and info['change'] > 0)
+    # magnificant_down = sum(1 for info in magnificent_seven_data.values() if info and info['change'] < 0)
+    
+    # # 计算上涨和下跌的板块数量
+    # sector_up = sum(1 for info in sector_data.values() if info and info['change'] > 0)
+    # sector_down = sum(1 for info in sector_data.values() if info and info['change'] < 0)
+    
+    # analysis_data = [
+    #     ['市场统计', '上涨数量', '下跌数量'],
+    #     ['主要指数', str(indices_up), str(indices_down)],
+    #     ['科技七巨头', str(magnificant_up), str(magnificant_down)],
+    #     ['主要板块', str(sector_up), str(sector_down)]
+    # ]
+    
+    # analysis_table = Table(analysis_data, colWidths=[1.5*inch, 1*inch, 1*inch])
+    # analysis_table.setStyle(TableStyle([
+    #     ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+    #     ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+    #     ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    #     ('FONTNAME', (0, 0), (-1, -1), font_name),
+    #     ('FONTSIZE', (0, 0), (-1, -1), 10),
+    #     ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    #     ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    # ]))
+    # story.append(analysis_table)
+    # story.append(Spacer(1, 0.3*inch))
+    
+    # # 找出表现最好的和最差的
+    # all_data = {
+    #     **{f"指数-{name}": info for name, info in indices_data.items()},
+    #     **{f"科技-{name}": info for name, info in magnificent_seven_data.items()},
+    #     **{f"板块-{name}": info for name, info in sector_data.items()}
+    # }
+    
+    # valid_data = {name: info for name, info in all_data.items() if info}
+    
+    # if valid_data:
+    #     best_performer = max(valid_data.items(), key=lambda x: x[1]['change_percent'] if x[1] else -float('inf'))
+    #     worst_performer = min(valid_data.items(), key=lambda x: x[1]['change_percent'] if x[1] else float('inf'))
+        
+    #     performance_data = []
+    #     performance_data.append(['表现类型', '名称', '涨跌幅(%)'])
+        
+    #     if best_performer[1]:
+    #         performance_data.append(['最佳表现', best_performer[0], f"+{best_performer[1]['change_percent']:.2f}%"])
+            
+    #     if worst_performer[1]:
+    #         performance_data.append(['最差表现', worst_performer[0], f"{worst_performer[1]['change_percent']:.2f}%"])
+            
+    #     performance_table = Table(performance_data, colWidths=[1.5*inch, 2*inch, 1*inch])
+    #     performance_table.setStyle(TableStyle([
+    #         ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+    #         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+    #         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    #         ('FONTNAME', (0, 0), (-1, -1), font_name),
+    #         ('FONTSIZE', (0, 0), (-1, -1), 10),
+    #         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    #         ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    #     ]))
+    #     story.append(performance_table)
+    
+    # 构建PDF
+    # doc.build(story)
+    # return filename
+
+def create_bar_chart(data, font_name):
     """
     创建柱状图
     """
@@ -299,9 +315,12 @@ def create_bar_chart(data, title, font_name):
         return Paragraph("无有效数据", getSampleStyleSheet()['Normal'])
     
     # 准备数据
-    names = list(valid_data.keys())
-    changes = [info['change_percent'] for info in valid_data.values()]
-    
+    names = []
+    changes = []
+    for name, info in valid_data.items():
+        names.append(f"{name}({info['change_percent']}%)")
+        changes.append(info['change_percent'])
+   
     # 创建绘图对象
     drawing = Drawing(400, 200)
     
@@ -343,23 +362,23 @@ def create_bar_chart(data, title, font_name):
     bc.valueAxis.labels.fontSize = 8
     
     # 计算每个柱子的高度比例
-    value_range = bc.valueAxis.valueMax - bc.valueAxis.valueMin
-    bar_heights = [(change - bc.valueAxis.valueMin) / value_range * bc.height for change in changes]
-    max_height = max(bar_heights)
-    # 添加数据标签，并确保与柱体顶部对齐
-    for i, (change, bar_height) in enumerate(zip(changes, bar_heights)):
-        label = Label()
-        # 计算标签的y坐标，使其位于柱体顶部上方5个像素处
-        x_position = bc.x + (bc.barWidth) + ((i) * (bc.barWidth + bc.groupSpacing))
-        # x_position = bc.x + #+  (i * (bc.barWidth + bc.groupSpacing))
-        # 计算标签的y坐标，使其位于柱体正上方
-        y_position = bc.y + max_height + 5
-        label.setOrigin(x_position , y_position)
-        label.setText(f"{change:.1f}%")
-        label.fontSize = 8
-        label.fontName = font_name
-        label.boxAnchor = 's'
-        drawing.add(label)
+    # value_range = bc.valueAxis.valueMax - bc.valueAxis.valueMin
+    # bar_heights = [(change - bc.valueAxis.valueMin) / value_range * bc.height for change in changes]
+    # max_height = max(bar_heights)
+    # # 添加数据标签，并确保与柱体顶部对齐
+    # for i, (change, bar_height) in enumerate(zip(changes, bar_heights)):
+    #     label = Label()
+    #     # 计算标签的y坐标，使其位于柱体顶部上方5个像素处
+    #     # x_position = bc.x + (bc.barWidth) + (i * (bc.barWidth + bc.groupSpacing)) 
+    #     x_position = bc.x + bc.barWidth + bc.groupSpacing + (i * (bc.barWidth + bc.groupSpacing)) 
+    #     # 计算标签的y坐标，使其位于柱体正上方
+    #     y_position = bc.y + bar_height + 5
+    #     label.setOrigin(x_position , y_position)
+    #     label.setText(f"{change:.1f}%")
+    #     label.fontSize = 8
+    #     label.fontName = font_name
+    #     label.boxAnchor = 's'
+    #     drawing.add(label)
 
     drawing.add(bc)
 
