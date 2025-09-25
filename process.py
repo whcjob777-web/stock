@@ -28,8 +28,10 @@ MAGNIFICENT_SEVEN = {
 # 主要板块ETF
 SECTOR_ETF = {
     'XLK': '科技',
+    'XLC': '通信',
     'XLF': '金融',
-    'XLY': '消费',
+    'XLY': '可选消费',
+    'XLP': '必选消费',
     'XLE': '能源',
     'XLV': '医疗',
     'XLI': '工业',

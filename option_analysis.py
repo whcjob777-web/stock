@@ -4,7 +4,20 @@ proxy = 'http://127.0.0.1:7890'  # 代理设置，此处修改
 os.environ['HTTP_PROXY'] = proxy
 os.environ['HTTPS_PROXY'] = proxy
 
-OPTINONS = ["QQQ", "SPY", "TSLA"]
+OPTINONS = [
+        "QQQ", 
+        "SPY", 
+        "AAPL",
+        "GOOG",
+        "MSFT",
+        "NVDA",
+        "META",
+        "AMZN",
+        "TSLA",
+        "MSTR",
+        "BMNR",
+        "SBET"
+        ]
 
 def main():
     """
